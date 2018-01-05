@@ -114,10 +114,12 @@ public final class UfsJournalLogWriter implements JournalWriter {
       throw new IOException(ExceptionMessage.JOURNAL_WRITE_AFTER_CLOSE.getMessage());
     }
     if (mResetStream) {
+      LOG.info("Resetting journal stream");
       resetStream();
       mResetStream = false;
     }
     if (mRotateLogForNextWrite) {
+      LOG.info("Rotating journal file");
       rotateLog();
       mRotateLogForNextWrite = false;
     }
@@ -307,6 +309,7 @@ public final class UfsJournalLogWriter implements JournalWriter {
     DataOutputStream outputStream = mJournalOutputStream.mOutputStream;
     try {
       outputStream.flush();
+      LOG.info("Flushed up to {}", mNextSequenceNumber - 1);
       // Since flush has succeeded, it's safe to clear the mUnflushedEntries queue
       // because they are considered "persisted" in UFS.
       mUnflushedEntries.clear();
@@ -336,6 +339,7 @@ public final class UfsJournalLogWriter implements JournalWriter {
     }
     closer.register(mGarbageCollector);
     closer.close();
+    LOG.info("Closed journal log writer");
     mClosed = true;
   }
 
@@ -380,6 +384,7 @@ public final class UfsJournalLogWriter implements JournalWriter {
      */
     @Override
     public void close() throws IOException {
+      LOG.info("Closing journal output stream");
       if (mOutputStream != null) {
         mOutputStream.close();
       }
@@ -388,13 +393,15 @@ public final class UfsJournalLogWriter implements JournalWriter {
 
       String src = mCurrentLog.getLocation().toString();
       if (!mUfs.exists(src) && mNextSequenceNumber == mCurrentLog.getStart()) {
-        // This can happen when there is any failures before creating a new log file after
+        LOG.warn("No current log to mark as complete");
+        // This can happen when there is a failure before creating a new log file after
         // committing last log file.
         return;
       }
 
       // Delete the current log if it contains nothing.
       if (mNextSequenceNumber == mCurrentLog.getStart()) {
+        LOG.info("Deleting empty log file {}");
         mUfs.deleteFile(src);
         return;
       }
