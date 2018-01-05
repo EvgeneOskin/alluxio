@@ -100,13 +100,13 @@ final class UfsJournalGarbageCollector implements Closeable {
       gcFileIfStale(checkpoints.get(i), checkpointSequenceNumber);
     }
 
-    for (UfsJournalFile log : snapshot.getLogs()) {
-      gcFileIfStale(log, checkpointSequenceNumber);
-    }
-
-    for (UfsJournalFile tmpCheckpoint : snapshot.getTemporaryCheckpoints()) {
-      gcFileIfStale(tmpCheckpoint, checkpointSequenceNumber);
-    }
+//    for (UfsJournalFile log : snapshot.getLogs()) {
+//      gcFileIfStale(log, checkpointSequenceNumber);
+//    }
+//
+//    for (UfsJournalFile tmpCheckpoint : snapshot.getTemporaryCheckpoints()) {
+//      gcFileIfStale(tmpCheckpoint, checkpointSequenceNumber);
+//    }
   }
 
   /**
